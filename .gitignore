@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Database files and datasets (large binary, regenerable via generate_data.py)
+dbs/
+data/

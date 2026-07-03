@@ -1,0 +1,14 @@
+[project]
+name = "graph-db-benchmark"
+version = "0.1.0"
+description = "Benchmark: DuckDB+DuckPGQ vs LadybugDB vs CozoDB"
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.1.0",
+    "ladybug",
+    "pycozo[embedded]",
+    "pandas>=2.0",
+    "pyarrow>=14.0",
+    "numpy>=1.26",
+    "psutil>=5.9",
+]

@@ -1,0 +1,61 @@
+{
+  "db": "ladybugdb",
+  "size": "small",
+  "ingest": {
+    "ingest_ms": 140.13
+  },
+  "queries": {
+    "point_lookup": {
+      "min_ms": 0.1502,
+      "median_ms": 0.1713,
+      "p95_ms": 0.219,
+      "max_ms": 0.219,
+      "iters": 20
+    },
+    "hop_1": {
+      "min_ms": 0.4943,
+      "median_ms": 0.5247,
+      "p95_ms": 0.5953,
+      "max_ms": 0.5953,
+      "iters": 20
+    },
+    "hop_2": {
+      "min_ms": 1.6954,
+      "median_ms": 1.7791,
+      "p95_ms": 1.8982,
+      "max_ms": 1.8982,
+      "iters": 20
+    },
+    "hop_3": {
+      "min_ms": 2.8989,
+      "median_ms": 3.015,
+      "p95_ms": 3.1559,
+      "max_ms": 3.1559,
+      "iters": 20
+    },
+    "shortest_path": {
+      "min_ms": 30.2422,
+      "median_ms": 31.2758,
+      "p95_ms": 32.8585,
+      "max_ms": 32.8585,
+      "iters": 20
+    },
+    "filtered_traversal": {
+      "min_ms": 6.379,
+      "median_ms": 6.7676,
+      "p95_ms": 7.3602,
+      "max_ms": 7.3602,
+      "iters": 20
+    },
+    "pattern_match": {
+      "min_ms": 3.9097,
+      "median_ms": 4.174,
+      "p95_ms": 4.4386,
+      "max_ms": 4.4386,
+      "iters": 20
+    },
+    "_errors": {
+      "shortest_path_note": "shortestPath() not available in LadybugDB 0.18; used MATCH p=()-[:Edge*1..8]->() ORDER BY length(p) LIMIT 1 workaround"
+    }
+  }
+}

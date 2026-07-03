@@ -1,0 +1,58 @@
+{
+  "db": "cozodb",
+  "size": "small",
+  "ingest": {
+    "ingest_ms": 153.2
+  },
+  "queries": {
+    "point_lookup": {
+      "min_ms": 0.0825,
+      "median_ms": 0.0859,
+      "p95_ms": 0.1039,
+      "max_ms": 0.1039,
+      "iters": 20
+    },
+    "hop_1": {
+      "min_ms": 0.0555,
+      "median_ms": 0.058,
+      "p95_ms": 0.0642,
+      "max_ms": 0.0642,
+      "iters": 20
+    },
+    "hop_2": {
+      "min_ms": 0.0723,
+      "median_ms": 0.0774,
+      "p95_ms": 0.1023,
+      "max_ms": 0.1023,
+      "iters": 20
+    },
+    "hop_3": {
+      "min_ms": 0.1177,
+      "median_ms": 0.1189,
+      "p95_ms": 0.1306,
+      "max_ms": 0.1306,
+      "iters": 20
+    },
+    "shortest_path": {
+      "min_ms": 24.7788,
+      "median_ms": 25.9574,
+      "p95_ms": 27.9393,
+      "max_ms": 27.9393,
+      "iters": 20
+    },
+    "filtered_traversal": {
+      "min_ms": 12.552,
+      "median_ms": 13.0419,
+      "p95_ms": 13.3377,
+      "max_ms": 13.3377,
+      "iters": 20
+    },
+    "pattern_match": {
+      "min_ms": 5.8898,
+      "median_ms": 6.3239,
+      "p95_ms": 7.0971,
+      "max_ms": 7.0971,
+      "iters": 20
+    }
+  }
+}

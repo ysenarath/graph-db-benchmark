@@ -1,0 +1,58 @@
+{
+  "db": "duckdb_duckpgq",
+  "size": "medium",
+  "ingest": {
+    "ingest_ms": 924.87
+  },
+  "queries": {
+    "point_lookup": {
+      "min_ms": 0.0751,
+      "median_ms": 0.0767,
+      "p95_ms": 0.0959,
+      "max_ms": 0.0959,
+      "iters": 20
+    },
+    "hop_1": {
+      "min_ms": 0.5542,
+      "median_ms": 0.6202,
+      "p95_ms": 0.7565,
+      "max_ms": 0.7565,
+      "iters": 20
+    },
+    "hop_2": {
+      "min_ms": 1.1976,
+      "median_ms": 1.2893,
+      "p95_ms": 2.5537,
+      "max_ms": 2.5537,
+      "iters": 20
+    },
+    "hop_3": {
+      "min_ms": 2.7862,
+      "median_ms": 2.9439,
+      "p95_ms": 3.5113,
+      "max_ms": 3.5113,
+      "iters": 20
+    },
+    "shortest_path": {
+      "min_ms": 1042.7101,
+      "median_ms": 1090.1036,
+      "p95_ms": 1153.9753,
+      "max_ms": 1153.9753,
+      "iters": 20
+    },
+    "filtered_traversal": {
+      "min_ms": 5.2454,
+      "median_ms": 5.8554,
+      "p95_ms": 7.4638,
+      "max_ms": 7.4638,
+      "iters": 20
+    },
+    "pattern_match": {
+      "min_ms": 5.1072,
+      "median_ms": 5.355,
+      "p95_ms": 5.7501,
+      "max_ms": 5.7501,
+      "iters": 20
+    }
+  }
+}
