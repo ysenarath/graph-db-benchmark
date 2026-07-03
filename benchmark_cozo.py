@@ -2,9 +2,11 @@
 CozoDB benchmark.
 Uses Datalog (CozoScript) for all queries. Embedded via pycozo[embedded].
 Temporal filtering is native to Datalog — no workarounds needed.
+Backend: RocksDB (persistent on-disk), matching DuckDB and LadybugDB.
 """
 import json
 import os
+import shutil
 
 import pandas as pd
 from pycozo.client import Client
@@ -12,6 +14,7 @@ from pycozo.client import Client
 from benchmark_utils import bench, bench_ingest, save_results
 
 CHUNK_SIZE = 50_000  # rows per batch insert
+DB_DIR = "dbs/cozo"
 
 
 def _df_to_rows(df: pd.DataFrame) -> list[list]:
@@ -173,7 +176,12 @@ def run_size(size_label: str, params: dict):
 
     print(f"\n[CozoDB] Size: {size_label}")
 
-    client = Client()  # in-memory
+    db_path = f"{DB_DIR}/{size_label}"
+    if os.path.exists(db_path):
+        shutil.rmtree(db_path)
+    os.makedirs(DB_DIR, exist_ok=True)
+
+    client = Client("rocksdb", db_path)
     create_schema(client)
 
     print("  Ingesting data …", flush=True)

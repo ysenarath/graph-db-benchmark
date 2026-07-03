@@ -10,12 +10,12 @@
 - **Version**: 3.13.13 (main, Jun 2 2026) [Clang 22.1.3]
 
 ## Database Versions & Installation
-| Database | Package | Version | Install |
-|---|---|---|---|
-| DuckDB | `duckdb` | 1.5.4 | `uv add duckdb` |
-| DuckPGQ | community extension | auto (via SQL) | `INSTALL duckpgq FROM community; LOAD duckpgq` |
-| LadybugDB | `ladybug` | 0.18.0 | `uv add ladybug` |
-| CozoDB | `pycozo[embedded]` + `cozo-embedded` | 0.7.6 | `uv add "pycozo[embedded]"` |
+| Database | Package | Version | Install | Storage backend |
+|---|---|---|---|---|
+| DuckDB | `duckdb` | 1.5.4 | `uv add duckdb` | file (`.duckdb`) |
+| DuckPGQ | community extension | auto (via SQL) | `INSTALL duckpgq FROM community; LOAD duckpgq` | — |
+| LadybugDB | `ladybug` | 0.18.0 | `uv add ladybug` | directory (`.lbug`) |
+| CozoDB | `pycozo[embedded]` + `cozo-embedded` | 0.7.6 | `uv add "pycozo[embedded]"` | RocksDB (directory) |
 
 ## Package Disambiguation Notes
 - **`ladybug` PyPI package** (v0.18+) is the LadybugDB graph database — a Kùzu-derived fork
