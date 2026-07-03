@@ -2,56 +2,56 @@
   "db": "ladybugdb",
   "size": "large",
   "ingest": {
-    "ingest_ms": 16747.89
+    "ingest_ms": 17110.07
   },
   "queries": {
     "point_lookup": {
-      "min_ms": 0.1435,
-      "median_ms": 0.1661,
-      "p95_ms": 0.2823,
-      "max_ms": 0.2823,
+      "min_ms": 0.1482,
+      "median_ms": 0.1749,
+      "p95_ms": 0.3011,
+      "max_ms": 0.3011,
       "iters": 20
     },
     "hop_1": {
-      "min_ms": 0.4819,
-      "median_ms": 0.5238,
-      "p95_ms": 0.5712,
-      "max_ms": 0.5712,
+      "min_ms": 0.5064,
+      "median_ms": 0.5528,
+      "p95_ms": 0.7025,
+      "max_ms": 0.7025,
       "iters": 20
     },
     "hop_2": {
-      "min_ms": 2.5065,
-      "median_ms": 2.6389,
-      "p95_ms": 6.6291,
-      "max_ms": 6.6291,
+      "min_ms": 2.2853,
+      "median_ms": 2.3743,
+      "p95_ms": 2.4767,
+      "max_ms": 2.4767,
       "iters": 20
     },
     "hop_3": {
-      "min_ms": 9.4466,
-      "median_ms": 12.9537,
-      "p95_ms": 19.6818,
-      "max_ms": 19.6818,
+      "min_ms": 6.2558,
+      "median_ms": 6.4565,
+      "p95_ms": 13.824,
+      "max_ms": 13.824,
       "iters": 20
     },
     "shortest_path": {
-      "min_ms": 204.6997,
-      "median_ms": 207.9522,
-      "p95_ms": 227.5687,
-      "max_ms": 227.5687,
+      "min_ms": 201.9218,
+      "median_ms": 205.0923,
+      "p95_ms": 224.5213,
+      "max_ms": 224.5213,
       "iters": 20
     },
     "filtered_traversal": {
-      "min_ms": 207.5005,
-      "median_ms": 228.3226,
-      "p95_ms": 241.5999,
-      "max_ms": 241.5999,
+      "min_ms": 193.9163,
+      "median_ms": 215.9431,
+      "p95_ms": 238.5935,
+      "max_ms": 238.5935,
       "iters": 20
     },
     "pattern_match": {
-      "min_ms": 134.2671,
-      "median_ms": 139.4897,
-      "p95_ms": 153.6985,
-      "max_ms": 153.6985,
+      "min_ms": 132.2421,
+      "median_ms": 147.8681,
+      "p95_ms": 152.2494,
+      "max_ms": 152.2494,
       "iters": 20
     }
   }
