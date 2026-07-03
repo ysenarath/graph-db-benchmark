@@ -82,27 +82,18 @@ def run_benchmarks(size_label: str, params: dict, conn: lb.Connection) -> dict:
         errors["hop_3"] = str(ex)
         results["hop_3"] = {"error": str(ex)}
 
-    # 5. Shortest path
-    # shortestPath() builtin not available in this LadybugDB version (0.18).
-    # Workaround: bounded variable-length path + ORDER BY length(p) LIMIT 1.
-    # Upper bound of 8 hops is a practical cap for random graphs.
+    # 5. Shortest path — native syntax: [:Edge* SHORTEST]
     sp_src = p["sp_src"]
     sp_dst = p["sp_dst"]
     def q_sp():
         r = conn.execute(f"""
-            MATCH p = (a:Node {{id: {sp_src}}})-[:Edge*1..8]->(b:Node {{id: {sp_dst}}})
+            MATCH p = (a:Node {{id: {sp_src}}})-[:Edge* SHORTEST]->(b:Node {{id: {sp_dst}}})
             RETURN length(p)
-            ORDER BY length(p)
-            LIMIT 1
         """)
         while r.has_next():
             r.get_next()
     try:
         results["shortest_path"] = bench(q_sp)
-        errors["shortest_path_note"] = (
-            "shortestPath() not available in LadybugDB 0.18; used "
-            "MATCH p=()-[:Edge*1..8]->() ORDER BY length(p) LIMIT 1 workaround"
-        )
     except Exception as ex:
         errors["shortest_path"] = str(ex)
         results["shortest_path"] = {"error": str(ex)}
@@ -149,7 +140,10 @@ def run_size(size_label: str, params: dict):
 
     db_path = f"{DB_DIR}/{size_label}.lbug"
     if os.path.exists(db_path):
-        shutil.rmtree(db_path, ignore_errors=True)
+        if os.path.isdir(db_path):
+            shutil.rmtree(db_path)
+        else:
+            os.remove(db_path)
     os.makedirs(DB_DIR, exist_ok=True)
 
     print(f"\n[LadybugDB] Size: {size_label}")

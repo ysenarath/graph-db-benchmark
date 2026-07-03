@@ -2,60 +2,57 @@
   "db": "ladybugdb",
   "size": "medium",
   "ingest": {
-    "ingest_ms": 2688.99
+    "ingest_ms": 2401.98
   },
   "queries": {
     "point_lookup": {
-      "min_ms": 0.1644,
-      "median_ms": 0.2111,
-      "p95_ms": 0.2785,
-      "max_ms": 0.2785,
+      "min_ms": 0.147,
+      "median_ms": 0.1683,
+      "p95_ms": 0.306,
+      "max_ms": 0.306,
       "iters": 20
     },
     "hop_1": {
-      "min_ms": 0.9006,
-      "median_ms": 0.9651,
-      "p95_ms": 1.0788,
-      "max_ms": 1.0788,
+      "min_ms": 0.8638,
+      "median_ms": 0.9038,
+      "p95_ms": 1.0538,
+      "max_ms": 1.0538,
       "iters": 20
     },
     "hop_2": {
-      "min_ms": 5.0426,
-      "median_ms": 5.2238,
-      "p95_ms": 5.4932,
-      "max_ms": 5.4932,
+      "min_ms": 4.732,
+      "median_ms": 4.8431,
+      "p95_ms": 5.0641,
+      "max_ms": 5.0641,
       "iters": 20
     },
     "hop_3": {
-      "min_ms": 12.7134,
-      "median_ms": 13.2477,
-      "p95_ms": 14.065,
-      "max_ms": 14.065,
+      "min_ms": 12.2581,
+      "median_ms": 12.5508,
+      "p95_ms": 13.2175,
+      "max_ms": 13.2175,
       "iters": 20
     },
     "shortest_path": {
-      "min_ms": 579.6487,
-      "median_ms": 591.0193,
-      "p95_ms": 600.0566,
-      "max_ms": 600.0566,
+      "min_ms": 19.7003,
+      "median_ms": 20.2923,
+      "p95_ms": 22.3532,
+      "max_ms": 22.3532,
       "iters": 20
     },
     "filtered_traversal": {
-      "min_ms": 92.4185,
-      "median_ms": 96.0747,
-      "p95_ms": 102.5829,
-      "max_ms": 102.5829,
+      "min_ms": 87.5628,
+      "median_ms": 90.9148,
+      "p95_ms": 95.6614,
+      "max_ms": 95.6614,
       "iters": 20
     },
     "pattern_match": {
-      "min_ms": 26.9927,
-      "median_ms": 28.4502,
-      "p95_ms": 30.0738,
-      "max_ms": 30.0738,
+      "min_ms": 25.066,
+      "median_ms": 26.1927,
+      "p95_ms": 27.1815,
+      "max_ms": 27.1815,
       "iters": 20
-    },
-    "_errors": {
-      "shortest_path_note": "shortestPath() not available in LadybugDB 0.18; used MATCH p=()-[:Edge*1..8]->() ORDER BY length(p) LIMIT 1 workaround"
     }
   }
 }

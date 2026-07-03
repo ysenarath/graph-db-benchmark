@@ -41,15 +41,13 @@ Timestamp range: 2024-01-01 to 2024-12-31 UTC (uniform distribution)
 - Ingest: single cold-start timing (not looped)
 - All databases run sequentially (no concurrency)
 
-## Known Workarounds / Limitations
+## Known Limitations / Design Notes
 1. **DuckPGQ LABEL syntax**: `CREATE PROPERTY GRAPH … LABEL <name>` not supported in
    DuckDB 1.5.4 / DuckPGQ community extension. Table names used as labels instead.
-   Affects: graph creation only; query behavior is identical.
-2. **LadybugDB `shortestPath()`**: built-in function not available in v0.18. Workaround:
-   `MATCH p = (a)-[:Edge*1..8]->(b) RETURN length(p) ORDER BY length(p) LIMIT 1`.
-   Upper bound of 8 hops is appropriate for these graphs (random, avg degree 10, small diameter).
+   Affects graph creation only; query behaviour is identical.
+2. **LadybugDB shortest path**: uses native `[:Edge* SHORTEST]` syntax per the LadybugDB
+   Python tutorial. Results verified correct against Python BFS ground truth (6/5/6 hops).
 3. **CozoDB temporal filter**: no secondary index on `ts`. Filter requires a full edge scan
    inside the `temp_edge` rule; accounts for CozoDB being slower on filtered_traversal.
-4. **CozoDB point_lookup / 1-hop**: initial run used predicate-style binding (`id = $nid`)
-   which triggers a full scan. Fixed to key-position binding (`*nodes[$nid, ...]`) to match
-   the index use of the other databases. Results reflect the corrected version.
+4. **CozoDB point_lookup / 1-hop**: uses key-position parameter binding (`*nodes[$nid, ...]`)
+   rather than predicate-style (`id = $nid`) to get B-tree index lookup instead of full scan.

@@ -2,56 +2,56 @@
   "db": "cozodb",
   "size": "large",
   "ingest": {
-    "ingest_ms": 22990.51
+    "ingest_ms": 42520.84
   },
   "queries": {
     "point_lookup": {
-      "min_ms": 0.0804,
-      "median_ms": 0.0894,
-      "p95_ms": 0.1303,
-      "max_ms": 0.1303,
+      "min_ms": 0.0907,
+      "median_ms": 0.0927,
+      "p95_ms": 0.1083,
+      "max_ms": 0.1083,
       "iters": 20
     },
     "hop_1": {
-      "min_ms": 0.0578,
-      "median_ms": 0.0618,
-      "p95_ms": 0.0725,
-      "max_ms": 0.0725,
+      "min_ms": 0.0733,
+      "median_ms": 0.0806,
+      "p95_ms": 0.1238,
+      "max_ms": 0.1238,
       "iters": 20
     },
     "hop_2": {
-      "min_ms": 0.0887,
-      "median_ms": 0.09,
-      "p95_ms": 0.1016,
-      "max_ms": 0.1016,
+      "min_ms": 0.1732,
+      "median_ms": 0.1982,
+      "p95_ms": 0.5613,
+      "max_ms": 0.5613,
       "iters": 20
     },
     "hop_3": {
-      "min_ms": 0.366,
-      "median_ms": 0.3723,
-      "p95_ms": 0.4243,
-      "max_ms": 0.4243,
+      "min_ms": 1.2132,
+      "median_ms": 1.2588,
+      "p95_ms": 1.5702,
+      "max_ms": 1.5702,
       "iters": 20
     },
     "shortest_path": {
-      "min_ms": 7071.4772,
-      "median_ms": 7182.4593,
-      "p95_ms": 7348.4427,
-      "max_ms": 7348.4427,
+      "min_ms": 8942.057,
+      "median_ms": 9146.2751,
+      "p95_ms": 9425.2097,
+      "max_ms": 9425.2097,
       "iters": 20
     },
     "filtered_traversal": {
-      "min_ms": 2988.285,
-      "median_ms": 3024.6246,
-      "p95_ms": 3178.9981,
-      "max_ms": 3178.9981,
+      "min_ms": 4669.8944,
+      "median_ms": 4715.6371,
+      "p95_ms": 4745.8973,
+      "max_ms": 4745.8973,
       "iters": 20
     },
     "pattern_match": {
-      "min_ms": 5.973,
-      "median_ms": 6.0958,
-      "p95_ms": 6.7825,
-      "max_ms": 6.7825,
+      "min_ms": 15.62,
+      "median_ms": 15.8353,
+      "p95_ms": 16.6753,
+      "max_ms": 16.6753,
       "iters": 20
     }
   }
