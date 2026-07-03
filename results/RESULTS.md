@@ -121,12 +121,26 @@ This is because edges are indexed by `{src, dst, edge_type}` — traversal ancho
 DuckDB and LadybugDB hop times grow with graph size because their GRAPH_TABLE / Cypher engines
 materialize more intermediate results. CozoDB's Datalog compilation routes through the index at every hop.
 
-### DuckPGQ shortest path is disproportionately slow
-DuckDB's `ANY SHORTEST` takes 58ms (small) → 1090ms (medium) → 11715ms (large), a ~200× ratio.
-CozoDB BFS takes 26ms → 453ms → 7183ms (~276× ratio, similar scaling). LadybugDB's workaround
-produces 31ms → 591ms → 4165ms, the fastest of the three, likely because the bounded `*1..8`
-expansion allows earlier pruning. All three exhibit super-linear scaling on shortest path because
-BFS over random graphs with avg degree 10 visits O(10^d) nodes where d = diameter.
+### LadybugDB's shortest path lead at large scale is an artifact of its workaround
+CozoDB is actually faster on small and medium (26ms vs 31ms; 453ms vs 591ms). LadybugDB only
+pulls ahead on large (4,165ms vs 7,183ms). The reason: LadybugDB has no native `shortestPath()`
+in v0.18, so the benchmark uses:
+
+```cypher
+MATCH p = (a)-[:Edge*1..8]->(b) RETURN length(p) ORDER BY length(p) LIMIT 1
+```
+
+The `LIMIT 1` lets the Cypher planner terminate as soon as _any_ path is found rather than
+completing the entire BFS frontier. CozoDB's `ShortestPathBFS` is a faithful BFS — it finishes
+each depth level before going deeper, which is more work at large scale (avg degree 10 means
+each level multiplies the frontier by ~10). The workaround does less work, not smarter work.
+
+A native bidirectional BFS in LadybugDB would likely close this gap or reverse it. The
+large-scale result should not be read as "LadybugDB is faster at shortest path."
+
+DuckDB's `ANY SHORTEST` takes 58ms (small) → 1090ms (medium) → 11715ms (large). All three
+exhibit super-linear scaling because BFS over random graphs with avg degree 10 visits O(10^d)
+nodes where d = diameter (~5–6 hops for these graphs).
 
 ## Recommendation (data-driven only)
 
@@ -144,7 +158,7 @@ _(Note: LadybugDB and CozoDB are statistically tied at the aggregate level.)_
 |---|---|
 | Graph traversal (1–3 hop) at any scale | **CozoDB** (constant-time via B-tree key) |
 | Temporal filtering on edges | **DuckDB** (secondary ts index, 3ms vs 278–3024ms) |
-| Shortest path | **LadybugDB** (fastest workaround; native BFS not yet in 0.18) |
+| Shortest path | **CozoDB** wins small/medium; LadybugDB wins large via early-exit workaround (see note above) |
 | Pattern matching (subgraph) | **DuckDB** (vectorized SQL join, 5ms vs 7–154ms at medium/large) |
 | Bulk ingest speed | **DuckDB** (direct Parquet read, 6.7s vs 18–23s for large) |
 | Ingest simplicity | **DuckDB** (one-liner `CREATE TABLE AS SELECT * FROM parquet`) |
