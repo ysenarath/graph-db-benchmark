@@ -117,17 +117,31 @@ def main():
         elapsed = time.perf_counter() - t0
         print(f"  Total time for {db_name}: {elapsed:.1f}s")
 
-    # Step 4: Generate report
-    print(f"\n[{step}/5] Generating RESULTS.md …")
+    # Step 4: Vector search benchmark
+    if not args.only:
+        print(f"\n[{step}/6] Running vector search benchmark …")
+        step += 1
+        t0 = time.perf_counter()
+        try:
+            import benchmark_vector as bm_vec
+            bm_vec.main()
+        except Exception as ex:
+            print(f"  ERROR running vector benchmark: {ex}")
+            import traceback
+            traceback.print_exc()
+        print(f"  Total time: {time.perf_counter() - t0:.1f}s")
+
+    # Step 5: Generate report
+    print(f"\n[{step}/6] Generating RESULTS.md …")
     import report
     report.main()
 
     print("\n" + "=" * 60)
     print("Benchmark complete. See:")
-    print("  environment.md    — system/version info")
-    print("  data/             — Parquet datasets + query_params.json")
-    print("  results/*.json    — raw timing data per DB per size")
-    print("  results/RESULTS.md — summary tables and recommendation")
+    print("  environment.md      — system/version info")
+    print("  data/               — Parquet datasets + query_params.json")
+    print("  results/*.json      — raw timing data per DB per size")
+    print("  results/RESULTS.md  — summary tables and recommendation")
     print("=" * 60)
 
 

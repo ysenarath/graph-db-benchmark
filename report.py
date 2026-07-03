@@ -26,14 +26,31 @@ SIZES = ["small", "medium", "large"]
 
 
 def load_results() -> dict:
-    """Returns {db: {size: data}}"""
+    """Returns {db: {size: data}} for graph benchmark results (excludes vec_* files)."""
     out = {}
     for path in Path("results").glob("*.json"):
         stem = path.stem  # e.g. duckdb_small
-        parts = stem.split("_", 1)
+        if stem.startswith("vec_"):
+            continue
+        parts = stem.rsplit("_", 1)
         if len(parts) != 2:
             continue
         db, size = parts
+        with open(path) as f:
+            data = json.load(f)
+        out.setdefault(db, {})[size] = data
+    return out
+
+
+def load_vec_results() -> dict:
+    """Returns {db: {size: data}} for vector benchmark results (vec_* files)."""
+    out = {}
+    for path in Path("results").glob("vec_*.json"):
+        stem = path.stem  # e.g. vec_duckdb_small
+        parts = stem.rsplit("_", 1)
+        if len(parts) != 2:
+            continue
+        db, size = parts  # db = "vec_duckdb", size = "small"
         with open(path) as f:
             data = json.load(f)
         out.setdefault(db, {})[size] = data
@@ -193,8 +210,69 @@ def pick_one(all_results: dict) -> str:
     return "\n".join(lines)
 
 
+VEC_DB_LABELS = {
+    "vec_duckdb":  "DuckDB + vss",
+    "vec_ladybug": "LadybugDB",
+    "vec_cozo":    "CozoDB",
+}
+
+VEC_QUERY_LABELS = {
+    "vector_knn":        "kNN Search (k=10, cosine)",
+    "hybrid_vector_hop": "Hybrid: kNN → 1-hop expansion",
+}
+
+
+def vector_section(vec_results: dict) -> str:
+    if not vec_results:
+        return ""
+
+    dbs   = ["vec_duckdb", "vec_ladybug", "vec_cozo"]
+    sizes = [s for s in SIZES if any(s in vec_results.get(d, {}) for d in dbs)]
+    if not sizes:
+        return ""
+
+    lines = ["## Vector Search Benchmark\n",
+             f"Embedding: {128}-dim float32 unit vectors, cosine metric.  ",
+             "HNSW index built after data load. 3 warmup + 20 timed runs per query.\n"]
+
+    # Index build time table
+    lines.append("### HNSW Index Build Time\n")
+    lines.append("_Cold-start time to build the HNSW index after all data is loaded._\n")
+    hdr = "| Size | " + " | ".join(VEC_DB_LABELS[d] for d in dbs) + " |"
+    sep = "|" + "|".join(["---"] * (len(dbs) + 1)) + "|"
+    lines += [hdr, sep]
+    for size in sizes:
+        row = [size.capitalize()]
+        for db in dbs:
+            build = vec_results.get(db, {}).get(size, {}).get("index_build", {})
+            ms = build.get("build_ms")
+            row.append(fmt(ms) if ms is not None else "—")
+        lines.append("| " + " | ".join(row) + " |")
+    lines.append("")
+
+    # Query latency tables
+    for qkey, qlabel in VEC_QUERY_LABELS.items():
+        lines.append(f"### {qlabel}\n")
+        lines.append("_Median latency (ms). Lower is better._\n")
+        hdr = "| Size | " + " | ".join(VEC_DB_LABELS[d] for d in dbs) + " |"
+        lines += [hdr, sep]
+        for size in sizes:
+            row = [size.capitalize()]
+            for db in dbs:
+                q = vec_results.get(db, {}).get(size, {}).get("queries", {}).get(qkey)
+                if q and "median_ms" in q:
+                    row.append(fmt(q["median_ms"]))
+                else:
+                    row.append("—")
+            lines.append("| " + " | ".join(row) + " |")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
 def main():
     all_results = load_results()
+    vec_results = load_vec_results()
 
     with open("results/RESULTS.md", "w") as f:
         f.write("# Graph Database Benchmark Results\n\n")
@@ -258,6 +336,12 @@ def main():
         f.write("## Recommendation (data-driven only)\n\n")
         f.write(pick_one(all_results))
         f.write("\n")
+
+        # Vector search section (only if vec results exist)
+        vec_section = vector_section(vec_results)
+        if vec_section:
+            f.write("\n")
+            f.write(vec_section)
 
     print("Written: results/RESULTS.md")
 

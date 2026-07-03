@@ -1,0 +1,26 @@
+{
+  "db": "vec_cozo",
+  "size": "small",
+  "ingest": {
+    "ingest_ms": 503.21
+  },
+  "index_build": {
+    "build_ms": 108186.86
+  },
+  "queries": {
+    "vector_knn": {
+      "min_ms": 3.556,
+      "median_ms": 3.6382,
+      "p95_ms": 4.0988,
+      "max_ms": 4.0988,
+      "iters": 20
+    },
+    "hybrid_vector_hop": {
+      "min_ms": 3.3989,
+      "median_ms": 3.5535,
+      "p95_ms": 5.4703,
+      "max_ms": 5.4703,
+      "iters": 20
+    }
+  }
+}

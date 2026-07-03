@@ -1,0 +1,26 @@
+{
+  "db": "vec_ladybug",
+  "size": "large",
+  "ingest": {
+    "ingest_ms": 34379.33
+  },
+  "index_build": {
+    "build_ms": 438820.41
+  },
+  "queries": {
+    "vector_knn": {
+      "min_ms": 174.2811,
+      "median_ms": 186.4768,
+      "p95_ms": 192.3547,
+      "max_ms": 192.3547,
+      "iters": 20
+    },
+    "hybrid_vector_hop": {
+      "min_ms": 951.1776,
+      "median_ms": 1016.8435,
+      "p95_ms": 1174.752,
+      "max_ms": 1174.752,
+      "iters": 20
+    }
+  }
+}

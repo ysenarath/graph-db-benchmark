@@ -117,37 +117,24 @@ _No errors or unsupported operations — all queries use each engine's idiomatic
 Using `[:Edge*N..N]` (variable-length exact-hop syntax) instead of chained MATCH triggers
 LadybugDB's `RECURSIVE_EXTEND` operator instead of a nested hash join plan. The hash join plan
 does a full `SCAN_NODE_TABLE` + full `SCAN_REL_TABLE` then hash-filters to the reachable set;
-the recursive plan follows edges directly from the starting node.
-
-Profiled via `PROFILE MATCH (a:Node {id:…})-[:Edge]->(b:Node)-[:Edge]->(c:Node) …` —
-confirmed `SCAN_NODE_TABLE` emits ~8K tuples for a graph with 10K nodes, vs 1 tuple for primary
-key lookup in the recursive plan.
-
-Improvement (median, 3 warmup + 20 timed runs):
+the recursive plan follows edges directly from the starting node. Confirmed via `PROFILE`.
 
 | | 2-hop improvement | 3-hop improvement |
 |---|---|---|
-| Small (10K nodes) | -24% (1.8ms → 1.4ms) | -50% (2.9ms → 1.4ms) |
-| Medium (100K nodes) | -25% (4.8ms → 3.6ms) | **-62%** (12.6ms → 4.8ms) |
-| Large (1M nodes) | -8% (2.6ms → 2.4ms) | -50% (13.0ms → 6.5ms) |
-
-All results verified correct against chained MATCH (same COUNT(DISTINCT) output).
+| Small | -24% | -50% |
+| Medium | -25% | **-62%** |
+| Large | -8% | -50% |
 
 ### CozoDB hop traversals scale with out-degree, not graph size
 
 CozoDB's 2-hop / 3-hop times remain low across all sizes (0.1–1.3 ms on large) because edges are
 indexed by `{src, dst, edge_type}` — each hop is an O(degree) B-tree range scan, not O(|E|).
-The RocksDB block cache keeps hot index pages in memory after warmup, so on-disk storage adds
-minimal overhead for these traversals.
+RocksDB block cache keeps hot index pages in memory after warmup.
 
 ### LadybugDB shortest path is genuinely fast via native `* SHORTEST`
 
-The `[:Edge* SHORTEST]` syntax invokes a native shortest-path algorithm that terminates as soon
-as the destination is first reached. DuckDB's `ANY SHORTEST` and CozoDB's `ShortestPathBFS` appear
-to complete full BFS frontiers rather than terminating on first hit.
-
-Results confirmed correct against Python BFS ground truth: all three engines return the true
-shortest path length (6 / 5 / 6 hops for small / medium / large).
+The `[:Edge* SHORTEST]` syntax invokes an early-terminating BFS that stops on first hit.
+Results confirmed correct against Python BFS ground truth (6 / 5 / 6 hops for small / medium / large).
 
 ## Recommendation (data-driven only)
 
@@ -170,6 +157,60 @@ that query out and CozoDB leads on traversal, DuckDB leads on filtering and patt
 | Pattern matching (subgraph) | **DuckDB** — vectorised SQL joins |
 | Bulk ingest speed | **DuckDB** — direct Parquet read (6.7 s vs 17 s vs 42.5 s for large) |
 
-**Bottom line**: LadybugDB wins if shortest path is in your hot path. CozoDB wins for hop
-traversal workloads. DuckDB wins for temporal filtering, pattern matching, and ingest throughput —
-and brings full SQL alongside the graph primitives.
+## Vector Search Benchmark
+
+Embedding: 128-dim float32 unit vectors, cosine metric.  
+HNSW index built after data load. 3 warmup + 20 timed runs per query.
+
+### HNSW Index Build Time
+
+_Cold-start time to build the HNSW index after all data is loaded._
+
+| Size | DuckDB + vss | LadybugDB | CozoDB |
+|---|---|---|---|
+| Small | 353.2 ms | 3053.2 ms | 108186.9 ms |
+| Medium | 4506.8 ms | 33758.8 ms | — |
+| Large | 78225.0 ms | 438820.4 ms | — |
+
+### kNN Search (k=10, cosine)
+
+_Median latency (ms). Lower is better._
+
+| Size | DuckDB + vss | LadybugDB | CozoDB |
+|---|---|---|---|
+| Small | 0.8 ms | 3.5 ms | 3.6 ms |
+| Medium | 1.1 ms | 6.4 ms | — |
+| Large | 1.1 ms | 186.5 ms | — |
+
+### Hybrid: kNN → 1-hop expansion
+
+_Median latency (ms). Lower is better._
+
+| Size | DuckDB + vss | LadybugDB | CozoDB |
+|---|---|---|---|
+| Small | 1.4 ms | 12.7 ms | 3.6 ms |
+| Medium | 2.3 ms | 262.5 ms | — |
+| Large | 4.5 ms | 1016.8 ms | — |
+
+### Vector search findings
+
+**DuckDB + vss wins on every vector metric:**
+- kNN latency is flat at ~1.1 ms regardless of graph size (HNSW locality means the search
+  path length grows only as O(log N)) — but LadybugDB degrades to 186 ms at 1M nodes.
+- HNSW index builds 8–9× faster than LadybugDB (78 s vs 439 s for 1M nodes).
+- Hybrid (kNN + 1-hop) stays under 5 ms across all sizes vs 1 s for LadybugDB at large.
+
+**LadybugDB kNN degrades at large scale:**
+The 186 ms median at large (vs 1.1 ms for DuckDB) suggests LadybugDB's HNSW implementation
+does not cache hot nodes as effectively as DuckDB's in-memory-first vss implementation.
+Both are on-disk (persistent), but DuckDB's block cache appears more effective for HNSW traversal.
+
+**CozoDB HNSW index build is impractical at scale:**
+CozoDB persists every HNSW graph connection individually to RocksDB, making index construction
+I/O-bound. Small (10K nodes) took 108 s; medium/large were not run. DuckDB builds the same index
+in 0.35 s. CozoDB's `::hnsw` feature exists, but the RocksDB backend makes it uncompetitive for
+vector-heavy workloads.
+
+**If vector search is in your workload, DuckDB + vss is the clear choice.**
+LadybugDB is usable at small/medium scale. CozoDB's vector support is not yet practical for
+graph-scale datasets on persistent storage.

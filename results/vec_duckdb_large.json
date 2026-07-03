@@ -1,0 +1,26 @@
+{
+  "db": "vec_duckdb",
+  "size": "large",
+  "ingest": {
+    "ingest_ms": 4629.02
+  },
+  "index_build": {
+    "build_ms": 78224.96
+  },
+  "queries": {
+    "vector_knn": {
+      "min_ms": 1.0248,
+      "median_ms": 1.0792,
+      "p95_ms": 1.3211,
+      "max_ms": 1.3211,
+      "iters": 20
+    },
+    "hybrid_vector_hop": {
+      "min_ms": 4.2839,
+      "median_ms": 4.523,
+      "p95_ms": 4.9321,
+      "max_ms": 4.9321,
+      "iters": 20
+    }
+  }
+}

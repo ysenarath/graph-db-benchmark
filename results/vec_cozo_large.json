@@ -1,0 +1,6 @@
+{
+  "db": "vec_cozo",
+  "size": "large",
+  "skipped": true,
+  "reason": "CozoDB HNSW on RocksDB is I/O-bound: ~108s for 10K nodes; large would take hours."
+}

@@ -1,6 +1,8 @@
 """
 Synthetic property graph generator.
 Fixed seed = 42. Outputs identical Parquet files for all three databases.
+Also generates nodes_vec_{size}.parquet with 128-dim float32 unit-vector
+embeddings for the vector search benchmark.
 """
 import json
 import os
@@ -8,8 +10,11 @@ import time
 
 import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 SEED = 42
+EMBED_DIM = 128
 CATEGORIES = ["person", "org", "location", "event", "product", "topic", "resource", "service"]
 EDGE_TYPES  = ["knows", "works_at", "located_in", "part_of", "related_to"]
 
@@ -107,12 +112,37 @@ def main():
         nodes.to_parquet(nodes_path, index=False)
         edges.to_parquet(edges_path, index=False)
 
+        # Query params drawn from main rng — same sequence as original benchmark
         params = query_params(size_label, n_nodes, rng)
+
+        # Embeddings use a separate rng so they don't disturb the main rng sequence.
+        # Seed is deterministic: SEED XOR n_nodes keeps each tier independent.
+        print(f"         Generating {EMBED_DIM}-dim embeddings …", flush=True)
+        emb_rng = np.random.default_rng(SEED ^ n_nodes)
+        emb = emb_rng.standard_normal((n_nodes, EMBED_DIM)).astype(np.float32)
+        emb /= np.linalg.norm(emb, axis=1, keepdims=True)
+        # Write as FixedSizeList<float32, EMBED_DIM> — maps to FLOAT[128] in LadybugDB/DuckDB
+        flat = pa.array(emb.flatten(), type=pa.float32())
+        emb_col = pa.FixedSizeListArray.from_arrays(flat, EMBED_DIM)
+        vec_tbl = pa.table({
+            "id":        pa.array(nodes["id"].values, type=pa.int64()),
+            "category":  pa.array(nodes["category"].values),
+            "value":     pa.array(nodes["value"].values, type=pa.float64()),
+            "ts":        pa.array(nodes["ts"].values, type=pa.int64()),
+            "embedding": emb_col,
+        })
+        vec_path = f"data/nodes_vec_{size_label}.parquet"
+        pq.write_table(vec_tbl, vec_path)
+
+        # Query vector for vector benchmark (also from emb_rng)
+        qvec = emb_rng.standard_normal(EMBED_DIM).astype(np.float32)
+        qvec /= np.linalg.norm(qvec)
+        params["query_vector"] = qvec.tolist()
         all_params[size_label] = params
 
         elapsed = time.perf_counter() - t0
-        print(f"         Done in {elapsed:.2f}s → {nodes_path}, {edges_path}")
-        print(f"         Query params: {json.dumps({k: v for k, v in params.items() if k != 'size'})}")
+        print(f"         Done in {elapsed:.2f}s → {nodes_path}, {edges_path}, {vec_path}")
+        print(f"         Query params: {json.dumps({k: v for k, v in params.items() if k not in ('size', 'query_vector')})}")
 
     with open("data/query_params.json", "w") as f:
         json.dump(all_params, f, indent=2)
